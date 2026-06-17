@@ -32,28 +32,35 @@ jobs:
         with:
           gradle-version: '8.5'
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Display environment
+        run: |
+          echo "ANDROID_HOME: $ANDROID_HOME"
+          echo "JAVA_HOME: $JAVA_HOME"
+          echo "Gradle version:"
+          gradle --version
+
+      - name: Create local.properties
+        run: |
+          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          cat local.properties
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --stacktrace
+        run: gradle assembleDebug --no-daemon --info 2>&1 | tee build.log
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
+
+      - name: Show build log tail
+        if: always()
+        run: |
+          echo "=== Build log (last 200 lines) ==="
+          tail -200 build.log || true
+          echo "=== APK files ==="
+          find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: course-manager-debug-apk
           path: app/build/outputs/apk/debug/*.apk
-
-      - name: APK Output Location
-        run: |
-          echo "=== APK Files ==="
-          ls -lh app/build/outputs/apk/debug/
