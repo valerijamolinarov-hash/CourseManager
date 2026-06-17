@@ -33,6 +33,14 @@ jobs:
           gradle-version: '8.5'
           cache-disabled: true
 
+      - name: Show environment
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "JAVA_HOME=$JAVA_HOME"
+          echo "PATH=$PATH"
+          ls -la /opt/hostedtoolcache/android* 2>/dev/null || echo "No android in /opt"
+          ls -la $HOME/android* 2>/dev/null || echo "No android in HOME"
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
@@ -43,11 +51,15 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          pwd
+          echo "=== Environment before build ==="
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "PWD=$(pwd)"
+          echo "GRADLE_OPTS=$GRADLE_OPTS"
           ls -la gradlew
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-          echo "=== EXIT CODE ==="
-          echo $?
+          cat gradlew | head -20
+          ./gradlew assembleDebug --no-daemon --info 2>&1 | tee build.log
+          BUILD_EXIT=$?
+          echo "=== BUILD EXIT CODE: $BUILD_EXIT ==="
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
@@ -55,8 +67,11 @@ jobs:
       - name: Show build result
         if: always()
         run: |
-          echo "=== Build log ==="
-          cat build.log 2>/dev/null || echo "No build.log"
+          echo "=== Build log (first 100 lines) ==="
+          head -100 build.log 2>/dev/null || echo "No build.log"
+          echo ""
+          echo "=== Build log (last 100 lines) ==="
+          tail -100 build.log 2>/dev/null || echo "No build.log"
           echo ""
           echo "=== APK files ==="
           find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
