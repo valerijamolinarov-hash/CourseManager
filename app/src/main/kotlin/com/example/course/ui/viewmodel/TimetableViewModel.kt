@@ -5,17 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.course.data.model.Course
 import com.example.course.data.repository.CourseRepository
-import com.example.course.util.DateUtil
 import dagger.hilt.android.lifecycle.ViewModelScoped
 import dagger.hilt.android.lifecycle.ViewModelInject
 import kotlinx.coroutines.launch
 
 @ViewModelScoped
-class HomeViewModel @ViewModelInject constructor(
+class TimetableViewModel @ViewModelInject constructor(
     private val courseRepository: CourseRepository
 ) : ViewModel() {
 
-    val todayCourses = mutableStateListOf<Course>()
     val allCourses = mutableStateListOf<Course>()
 
     init {
@@ -27,10 +25,6 @@ class HomeViewModel @ViewModelInject constructor(
             courseRepository.getAllCourses("2025-2026-2").collect { courses ->
                 allCourses.clear()
                 allCourses.addAll(courses)
-
-                val today = DateUtil.getCurrentDayOfWeek()
-                todayCourses.clear()
-                todayCourses.addAll(courses.filter { it.dayOfWeek == today })
             }
         }
     }
