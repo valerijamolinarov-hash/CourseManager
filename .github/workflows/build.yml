@@ -23,6 +23,7 @@ jobs:
           distribution: 'temurin'
 
       - name: Setup Android SDK
+        id: setup-android
         uses: android-actions/setup-android@v3
         with:
           packages: "build-tools;34.0.0 platforms;android-34"
@@ -35,12 +36,13 @@ jobs:
 
       - name: Create local.properties
         run: |
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
+          echo "sdk.dir=${{ steps.setup-android.outputs.sdk-root }}" > local.properties
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon 2>&1 | tee build.log || true
+        run: |
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee build.log
         env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
+          ANDROID_HOME: ${{ steps.setup-android.outputs.sdk-root }}
           GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
 
       - name: Show build result
@@ -59,6 +61,7 @@ jobs:
         with:
           name: course-manager-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+          retention-days: 5
 
       - name: Upload build log
         if: always()
@@ -66,3 +69,4 @@ jobs:
         with:
           name: build-log
           path: build.log
+          retention-days: 5
