@@ -3,12 +3,12 @@ package com.example.course.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.course.data.repository.UserRepository
-import dagger.hilt.android.lifecycle.ViewModelScoped
-import dagger.hilt.android.lifecycle.ViewModelInject
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-@ViewModelScoped
-class SettingsViewModel @ViewModelInject constructor(
+@HiltViewModel
+class SettingsViewModel @Inject constructor(
     private val userRepository: UserRepository
 ) : ViewModel() {
 

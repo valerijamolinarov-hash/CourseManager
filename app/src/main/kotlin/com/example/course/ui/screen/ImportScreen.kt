@@ -10,18 +10,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.course.ui.viewmodel.HomeViewModel
+import com.example.course.ui.viewmodel.ImportViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun ImportScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: ImportViewModel = hiltViewModel()
 ) {
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isLoading by remember { mutableStateOf(false) }
     var statusMessage by remember { mutableStateOf<String?>(null) }
-    
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -36,24 +36,24 @@ fun ImportScreen(
                 .fillMaxWidth()
                 .padding(bottom = 24.dp)
         )
-        
+
         Icon(
             imageVector = Icons.Default.CloudDownload,
             contentDescription = null,
             modifier = Modifier.size(80.dp),
             tint = MaterialTheme.colorScheme.primary
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Text(
             text = "从大连民族大学教务系统导入课程",
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
-        
+
         Spacer(modifier = Modifier.height(32.dp))
-        
+
         OutlinedTextField(
             value = username,
             onValueChange = { username = it },
@@ -61,9 +61,9 @@ fun ImportScreen(
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
@@ -72,9 +72,9 @@ fun ImportScreen(
             singleLine = true,
             visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation()
         )
-        
+
         Spacer(modifier = Modifier.height(24.dp))
-        
+
         Button(
             onClick = {
                 isLoading = true
@@ -99,7 +99,7 @@ fun ImportScreen(
             }
             Text(if (isLoading) "导入中..." else "开始导入")
         }
-        
+
         statusMessage?.let { message ->
             Spacer(modifier = Modifier.height(16.dp))
             Card(
@@ -114,9 +114,9 @@ fun ImportScreen(
                 )
             }
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         Text(
             text = "注意：导入功能需要连接校园网络或VPN",
             style = MaterialTheme.typography.bodySmall,

@@ -17,16 +17,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.course.data.model.Course
-import com.example.course.ui.viewmodel.HomeViewModel
+import com.example.course.ui.viewmodel.ManageViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManageScreen(
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: ManageViewModel = hiltViewModel()
 ) {
     val allCourses = viewModel.allCourses
     var showAddDialog by remember { mutableStateOf(false) }
-    
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -48,7 +48,7 @@ fun ManageScreen(
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-            
+
             if (allCourses.isEmpty()) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -71,7 +71,7 @@ fun ManageScreen(
             }
         }
     }
-    
+
     if (showAddDialog) {
         AddCourseDialog(
             onDismiss = { showAddDialog = false },
@@ -147,7 +147,7 @@ fun AddCourseDialog(
     var courseName by remember { mutableStateOf("") }
     var location by remember { mutableStateOf("") }
     var teacher by remember { mutableStateOf("") }
-    
+
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("添加课程") },

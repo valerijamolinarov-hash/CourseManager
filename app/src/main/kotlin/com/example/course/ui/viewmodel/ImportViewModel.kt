@@ -9,13 +9,13 @@ import com.example.course.data.remote.LoginService
 import com.example.course.data.repository.CourseRepository
 import com.example.course.data.repository.UserRepository
 import com.example.course.util.ColorUtil
-import dagger.hilt.android.lifecycle.ViewModelScoped
-import dagger.hilt.android.lifecycle.ViewModelInject
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-@ViewModelScoped
-class ImportViewModel @ViewModelInject constructor(
+@HiltViewModel
+class ImportViewModel @Inject constructor(
     private val loginService: LoginService,
     private val courseService: CourseService,
     private val courseRepository: CourseRepository,

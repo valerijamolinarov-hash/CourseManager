@@ -5,12 +5,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.course.data.model.Course
 import com.example.course.data.repository.CourseRepository
-import dagger.hilt.android.lifecycle.ViewModelScoped
-import dagger.hilt.android.lifecycle.ViewModelInject
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 import kotlinx.coroutines.launch
 
-@ViewModelScoped
-class TimetableViewModel @ViewModelInject constructor(
+@HiltViewModel
+class TimetableViewModel @Inject constructor(
     private val courseRepository: CourseRepository
 ) : ViewModel() {
 
