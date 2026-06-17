@@ -22,26 +22,28 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Check Android environment
+      - name: Check environment
         run: |
-          echo "ANDROID_HOME=$ANDROID_HOME"
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
           echo "JAVA_HOME=$JAVA_HOME"
-          ls -la $ANDROID_HOME 2>/dev/null || echo "ANDROID_HOME not found"
-          ls -la /usr/local/lib/android/sdk 2>/dev/null || echo "No Android SDK at /usr/local/lib/android/sdk"
+          java -version
+          echo ""
+          echo "ANDROID_HOME=${ANDROID_HOME:-not set}"
+          echo "ANDROID_SDK_ROOT=${ANDROID_SDK_ROOT:-not set}"
+          ls -la /usr/local/lib/android/sdk 2>/dev/null || echo "No SDK at /usr/local/lib/android/sdk"
 
-      - name: Setup Gradle 8.5
-        uses: gradle/actions/setup-gradle@v3
-        with:
-          gradle-version: '8.5'
-          cache-disabled: true
-
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Install Gradle
+        run: |
+          if ! command -v gradle &> /dev/null; then
+            echo "Gradle not found, installing..."
+            wget -q https://services.gradle.org/distributions/gradle-8.5-bin.zip -O /tmp/gradle.zip
+            unzip -q /tmp/gradle.zip -d /opt
+            export PATH=/opt/gradle-8.5/bin:$PATH
+          fi
+          gradle --version
 
       - name: Create local.properties
         run: |
-          if [ -d "$ANDROID_HOME" ]; then
+          if [ -n "$ANDROID_HOME" ] && [ -d "$ANDROID_HOME" ]; then
             echo "sdk.dir=$ANDROID_HOME" > local.properties
           elif [ -d "/usr/local/lib/android/sdk" ]; then
             echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
@@ -52,12 +54,17 @@ jobs:
 
       - name: Build Debug APK
         run: |
-          echo "=== Starting Gradle build ==="
-          echo "PWD=$(pwd)"
+          export PATH=/opt/gradle-8.5/bin:$PATH
+          echo "=== Gradle version ==="
+          gradle --version
+          echo ""
+          echo "=== Project structure ==="
           ls -la
-          ./gradlew --version 2>&1 || true
-          ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-          echo "=== BUILD EXIT CODE: $? ==="
+          echo ""
+          echo "=== Building APK ==="
+          gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
+          EXIT_CODE=${PIPESTATUS[0]}
+          echo "=== EXIT CODE: $EXIT_CODE ==="
 
       - name: Show build result
         if: always()
