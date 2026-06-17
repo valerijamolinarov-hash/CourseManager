@@ -7,7 +7,7 @@ import com.example.course.data.model.UserCredential
 
 @Database(
     entities = [Course::class, UserCredential::class],
-    version = 1,
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
