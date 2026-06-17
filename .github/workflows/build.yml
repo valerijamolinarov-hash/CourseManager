@@ -36,8 +36,9 @@ jobs:
         run: |
           echo "ANDROID_HOME: $ANDROID_HOME"
           echo "JAVA_HOME: $JAVA_HOME"
-          echo "Gradle version:"
           gradle --version
+          echo "=== SDK Manager ==="
+          $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --list_installed || true
 
       - name: Create local.properties
         run: |
@@ -45,7 +46,8 @@ jobs:
           cat local.properties
 
       - name: Build Debug APK
-        run: gradle assembleDebug --no-daemon --info 2>&1 | tee build.log
+        run: |
+          gradle assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log || true
         env:
           ANDROID_HOME: ${{ env.ANDROID_HOME }}
           GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
@@ -53,10 +55,16 @@ jobs:
       - name: Show build log tail
         if: always()
         run: |
-          echo "=== Build log (last 200 lines) ==="
-          tail -200 build.log || true
+          echo "=== Build log (last 300 lines) ==="
+          tail -300 build.log || true
+          echo ""
           echo "=== APK files ==="
           find . -name "*.apk" -type f 2>/dev/null || echo "No APK found"
+          echo ""
+          echo "=== Build directory ==="
+          ls -la app/build/outputs/ 2>/dev/null || echo "No outputs directory"
+          ls -la app/build/outputs/apk/ 2>/dev/null || echo "No apk directory"
+          ls -la app/build/outputs/apk/debug/ 2>/dev/null || echo "No debug directory"
 
       - name: Upload APK
         if: success()
@@ -64,3 +72,10 @@ jobs:
         with:
           name: course-manager-debug-apk
           path: app/build/outputs/apk/debug/*.apk
+
+      - name: Upload build log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log
+          path: build.log
