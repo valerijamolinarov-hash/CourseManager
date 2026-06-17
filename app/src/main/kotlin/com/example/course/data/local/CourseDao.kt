@@ -10,10 +10,10 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface CourseDao {
-    @Query("SELECT * FROM courses WHERE semester = :semester ORDER BY dayOfWeek, startSection")
+    @Query("SELECT * FROM courses WHERE semester = :semester ORDER BY dayOfWeek, startPeriod")
     fun getAllCourses(semester: String): Flow<List<Course>>
 
-    @Query("SELECT * FROM courses WHERE semester = :semester AND dayOfWeek = :dayOfWeek ORDER BY startSection")
+    @Query("SELECT * FROM courses WHERE semester = :semester AND dayOfWeek = :dayOfWeek ORDER BY startPeriod")
     fun getCoursesByDay(semester: String, dayOfWeek: Int): Flow<List<Course>>
 
     @Query("SELECT * FROM courses WHERE id = :id")
