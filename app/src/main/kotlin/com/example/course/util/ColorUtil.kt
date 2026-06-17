@@ -26,6 +26,14 @@ object ColorUtil {
         return courseColors[index % courseColors.size]
     }
 
+    fun getColorIntByIndex(index: Int): Int {
+        return try {
+            AndroidColor.parseColor(courseColors[index % courseColors.size])
+        } catch (e: Exception) {
+            0xFF6750A4
+        }
+    }
+
     fun stringToColor(colorString: String): Color {
         return try {
             Color(AndroidColor.parseColor(colorString))
