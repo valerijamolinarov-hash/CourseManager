@@ -22,23 +22,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: "build-tools;34.0.0 platforms;android-34"
-
-      - name: Show Android SDK path
+      - name: Check Android environment
         run: |
           echo "ANDROID_HOME=$ANDROID_HOME"
           echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
-          if [ -d "/opt/hostedtoolcache/Android" ]; then
-            echo "Found Android SDK at /opt/hostedtoolcache/Android"
-            ls -la /opt/hostedtoolcache/Android
-          fi
-          if [ -d "$HOME/android-sdk" ]; then
-            echo "Found Android SDK at $HOME/android-sdk"
-            ls -la $HOME/android-sdk
-          fi
+          echo "JAVA_HOME=$JAVA_HOME"
+          ls -la $ANDROID_HOME 2>/dev/null || echo "ANDROID_HOME not found"
+          ls -la /usr/local/lib/android/sdk 2>/dev/null || echo "No Android SDK at /usr/local/lib/android/sdk"
 
       - name: Setup Gradle 8.5
         uses: gradle/actions/setup-gradle@v3
@@ -51,34 +41,23 @@ jobs:
 
       - name: Create local.properties
         run: |
-          # Try multiple possible SDK locations
-          if [ -n "$ANDROID_HOME" ] && [ -d "$ANDROID_HOME" ]; then
-            echo "Using ANDROID_HOME=$ANDROID_HOME"
-          elif [ -d "/opt/hostedtoolcache/Android/sdk" ]; then
-            export ANDROID_HOME="/opt/hostedtoolcache/Android/sdk"
-            echo "Using /opt/hostedtoolcache/Android/sdk"
-          elif [ -d "$HOME/android-sdk" ]; then
-            export ANDROID_HOME="$HOME/android-sdk"
-            echo "Using $HOME/android-sdk"
+          if [ -d "$ANDROID_HOME" ]; then
+            echo "sdk.dir=$ANDROID_HOME" > local.properties
+          elif [ -d "/usr/local/lib/android/sdk" ]; then
+            echo "sdk.dir=/usr/local/lib/android/sdk" > local.properties
           else
-            echo "WARNING: Could not find Android SDK"
+            echo "sdk.dir=$HOME/android-sdk" > local.properties
           fi
-          echo "sdk.dir=$ANDROID_HOME" > local.properties
           cat local.properties
 
       - name: Build Debug APK
         run: |
-          echo "=== Environment ==="
-          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "=== Starting Gradle build ==="
           echo "PWD=$(pwd)"
-          echo "GRADLE_OPTS=$GRADLE_OPTS"
-          echo "=== Running Gradle ==="
+          ls -la
+          ./gradlew --version 2>&1 || true
           ./gradlew assembleDebug --no-daemon --stacktrace 2>&1 | tee build.log
-          EXIT_CODE=${PIPESTATUS[0]}
-          echo "=== EXIT CODE: $EXIT_CODE ==="
-        env:
-          ANDROID_HOME: ${{ env.ANDROID_HOME }}
-          GRADLE_OPTS: "-Xmx4g -XX:MaxMetaspaceSize=1g -Dfile.encoding=UTF-8"
+          echo "=== BUILD EXIT CODE: $? ==="
 
       - name: Show build result
         if: always()
